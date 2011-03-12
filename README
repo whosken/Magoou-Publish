@@ -1,1 +1,5 @@
-Welcome to Magoou Reporter -- Magoou.com's web content collection and profile engine. This file will be updated soon with more information on the engine and how to interface with it.
+Welcome to Magoou Publish -- Magoou.com's web content collection and profile engine. This file will be updated soon with more information on the engine and how to interface with it.
+
+The reporter package is for collecting and profiling web contents.
+The editor package is for selecting and suggesting contents based on user preferences.
+The util package contains low level code for logging, some generic functions for mimicing linear algebra operations, and other used functions.
