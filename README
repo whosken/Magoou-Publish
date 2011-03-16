@@ -4,11 +4,11 @@ The reporter package is for collecting and profiling web contents.
 
 The editor package is for selecting and suggesting contents based on user preferences.
 
-The util package contains low level code for logging, some generic functions for mimicing linear algebra operations, and other used functions.
+The util package contains low level code for logging, some generic functions for simple linear algebra operations, and other useful functions.
 
 A storage package is used but not included in the repository. This is to keep the implementation flexible for other developers. You can use a database and interface you prefer as long as you output the data into dictionaries with the following keys:
-entry: url, data source, language, type, author, datetime, title, summary, media, keywords {word:weight},
-feed: url, type, datetime, keywords {word:weight}
-user: username, password, location, preferences {word:weight}, datetime
-issue: username, datetime, entries {entryid:score}, (public?)
-usage - username, entryid, datetime, action
++ entry: url, data source, language, type, author, datetime, title, summary, media, keywords {word:weight},
++ feed: url, type, datetime, keywords {word:weight}
++ user: username, password, location, preferences {word:weight}, datetime
++ issue: username, datetime, entries {entryid:score}
++ usage - username, entryid, datetime, action
