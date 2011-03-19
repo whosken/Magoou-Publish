@@ -38,7 +38,7 @@ def _traverseXml(feed,xml):
 		
 		# parse summary
 		summary = entry.description
-		response['summary'] = cleanText(summary)
+		response['summary'] = tools.cleanText(summary)
 		if response['summary'].count(' ') < SUMMARYSIZE:
 			needScrape = True
 		

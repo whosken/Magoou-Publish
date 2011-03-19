@@ -31,7 +31,7 @@ def uniqify(list):
 def jsonify(object):
 	if type(object) is dict:
 		object = cleanDict(object)
-	elif type(object) is (i for i in range(0)):
+	elif type(object) is type(i for i in range(0)):
 		object = list(object)
 	return json.dumps(object)
 
@@ -75,7 +75,7 @@ def updateDictValue(dict,key,value,additive=True):
 		if additive:
 			dict[key] = value
 		else:
-			dict[key] = value / len(dict.keys())
+			dict[key] = value / len(dict)
 	return dict
 	
 def updateDictValues(dict,value,additive=True):

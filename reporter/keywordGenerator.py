@@ -1,5 +1,6 @@
 from math import log1p
 from util import *
+import re
 
 TITLEWEIGHT = 0.5
 INFOWEIGHT = 0.075

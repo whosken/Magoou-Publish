@@ -27,7 +27,7 @@ OEMBEDTYPES = {
 def scrapeEntry(entry,tryEmbed=True):
 	logMessage(__name__, "scraping " + entry['url'])
 	try:
-		raw, oEmbed = _crawlUrl(entry,tryEmbed)
+		raw, oEmbed = _crawlUrl(entry['url'],tryEmbed)
 		if oEmbed:
 			data = json.loads(raw)
 			return _traverseOEmbed(entry, data)

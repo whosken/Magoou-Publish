@@ -9,7 +9,7 @@ def logMessage(component, message):
 	return _writeToLog(''.join((component, ': ', message)))
 
 def logError(component):
-	message = _writeToLog(' '.join(('ERROR: ', component, ': ', sys.exc_info()[1])))
+	message = _writeToLog(' '.join(('ERROR: ', component, ': ', repr(sys.exc_info()[1]))))
 	_sendNotice(message)
 	raise
 	
