@@ -1,9 +1,6 @@
 from threading import Thread
 from util import *
 
-THREADLIMIT = 10
-
-
 def run(users,contents):
 	try:
 		def startThread(request,users,contents):
@@ -16,7 +13,7 @@ def run(users,contents):
 			user = _factorUsage(user,users,contents)
 			threads.append(startThread(user,users,contents))
 			users.putUser(user)
-			if len(threads) > THREADLIMIT:
+			if len(threads) > config.THREADLIMIT:
 				break
 			
 		for thread in threads:

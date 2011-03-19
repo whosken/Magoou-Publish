@@ -2,14 +2,6 @@ from math import log1p
 from util import *
 import re
 
-TITLEWEIGHT = 0.5
-INFOWEIGHT = 0.075
-SUMMARYWEIGHT = 0.5
-HIGHLIGHTWEIGHT = 0
-CATEGORYWEIGHT = 1
-
-MEHS = ('a','an','the','of','for','i', '', 'this', 'that', 'he', 'she', 'it', 'him', 'her', 'they', 'them', ' ', 'and', 'to', 'in', 'being', 'is', 'his', 'am', 'are')
-
 def generateKeywords(entry,keywords=None):
 	logMessage(__name__, "selecting keywords from " + entry['url'])
 	try: # TODO: consider better hieuristics for assigning bonuses
@@ -19,24 +11,24 @@ def generateKeywords(entry,keywords=None):
 			tools.updateDictValues(keywords,0.1,additive=False) # reduce weighting of keywords from feeds
 		
 		if 'title' in entry:
-			_collectKeywords(collectTerms(entry['title'],False),keywords,TITLEWEIGHT)
+			_collectKeywords(collectTerms(entry['title'],False),keywords,config.TITLEWEIGHT)
 		if entry['type'] == 0: # if content is article
-			_collectKeywords(collectTerms(entry['summary']),keywords,SUMMARYWEIGHT)
+			_collectKeywords(collectTerms(entry['summary']),keywords,config.SUMMARYWEIGHT)
 			if 'highlight' in entry: # if content has been scraped
-				_collectKeywords(collectTerms(entry.pop('highlight')),keywords,HIGHLIGHTWEIGHT)
+				_collectKeywords(collectTerms(entry.pop('highlight')),keywords,config.HIGHLIGHTWEIGHT)
 		
 		infos = []
 		for key in ('author','source','language'):
 			if key in entry:
 				infos.append(entry[key])
 		infos = list(_filteredTerms(infos))
-		_collectKeywords(infos,keywords,INFOWEIGHT,False)
+		_collectKeywords(infos,keywords,config.INFOWEIGHT,False)
 		
 		if 'categories' in entry:
 			categories = []
 			for category in entry['categories']:
 				categories += collectTerms(category)
-			_collectKeywords(categories,keywords,CATEGORYWEIGHT)
+			_collectKeywords(categories,keywords,config.CATEGORYWEIGHT)
 		
 		return keywords
 	except:
@@ -71,7 +63,7 @@ def collectTerms(string,nGram=True):
 def _filteredTerms(tokens): #TODO: use better NLP algorithms
 	for token in tokens:
 		#not an oversaturated word
-		if not token.lower() in MEHS:
+		if not token.lower() in config.MEHS:
 			if len(token) > 1:
 				yield token.strip()
 			

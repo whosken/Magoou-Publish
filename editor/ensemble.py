@@ -1,10 +1,5 @@
 from util import *
 
-ALPHAS = {
-			'languageModel':1.5,
-			'cosSim':1,
-		}
-
 def scoreEntries(candidates):
 	try: # TODO: mlp?
 		return _ensembleScores(candidates)
@@ -14,7 +9,7 @@ def scoreEntries(candidates):
 def _ensembleScores(candidates):
 	release = {}
 	for component,entries in candidates.items():
-		weighting = ALPHAS[component] if component in ALPHAS else 1
+		weighting = config.ALPHAS[component] if component in config.ALPHAS else 1
 		total = sum(entries.values())
 		for id,score in entries.items():
 			weight = score * weighting / total

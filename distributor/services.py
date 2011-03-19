@@ -1,4 +1,3 @@
-from util import *
 from storage import *
 from editor import editor
 from reporter import reporter
@@ -6,7 +5,8 @@ from reporter import reporter
 from hashlib import sha256
 from datetime import datetime
 
-MINIMUMSHOPS = 10
+from util import *
+from util import config2
 
 """
 authentication functions
@@ -91,9 +91,9 @@ def getShops(location,entryId):
 	with ContentManager() as contents:
 		keywords = contents.getDocument(entryId)['keywords']
 		shops = contents.getShopsWithKeywords(location,keywords.keys())
-		if len(shops) < MINIMUMSHOPS:
+		if len(shops) < config2.MINSHOPS:
 			shops += contents.getShopsWithKeywords('online',keywords.keys())
-	if len(shops) < MINIMUMSHOPS:
+	if len(shops) < config2.MINSHOPS:
 		pass # TODO: talk to yelp api to get the rest
 	return editor.selectCandidates(keywords,shops)
 	

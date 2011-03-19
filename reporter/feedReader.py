@@ -3,8 +3,6 @@ from datetime import *
 import feedparser
 from util import *
 
-SUMMARYSIZE = 30 # words
-
 def readFeed(feed):
 	logMessage(__name__, 'reading ' + feed['url'])
 	try:
@@ -39,7 +37,7 @@ def _traverseXml(feed,xml):
 		# parse summary
 		summary = entry.description
 		response['summary'] = tools.cleanText(summary)
-		if response['summary'].count(' ') < SUMMARYSIZE:
+		if response['summary'].count(' ') < config.SUMMARYSIZE:
 			needScrape = True
 		
 		# catch favicon

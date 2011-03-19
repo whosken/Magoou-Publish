@@ -3,18 +3,7 @@ import json
 from urllib2 import *
 from datetime import datetime, timedelta
 from util import *
-
-SERVER = '127.0.0.1'
-PORT = '5984'
-
-CONTENTDB = 'content_farm'
-USERDB = 'user_vault'
-
-FEEDAGE = 12 # hours = 1 days
-ISSUEAGE = 168 # hours = 7 days
-ISSUESSTORED = 12 # save latest issues, ~3 months
-
-TIMEOUT = 10 # secs = 1/6 minutes
+from util import config2
 
 class CouchManager:
 	def __init__(self,db):
@@ -31,7 +20,7 @@ class CouchManager:
 		try:
 			path = self._db + '/' + path.replace(' ','%20')
 			
-			request = Request('http://{0}:{1}/{2}'.format(SERVER,PORT,path))
+			request = Request('http://{0}:{1}/{2}'.format(config2.SERVER,config2.PORT,path))
 			request.get_method = lambda:method
 			request.add_header('Content-Type','application/json')
 			
@@ -39,7 +28,7 @@ class CouchManager:
 				request.add_data(data)
 
 			logMessage(__name__,request.get_full_url())
-			response = self._connect.open(request,timeout=TIMEOUT)
+			response = self._connect.open(request,config.TIMEOUT=config.TIMEOUT)
 			
 			if method == 'HEAD':
 				return response.info()
@@ -90,7 +79,7 @@ class CouchManager:
 
 class ContentManager(CouchManager):
 	def __init__(self):
-		CouchManager.__init__(self,CONTENTDB)
+		CouchManager.__init__(self,config2.CONTENTDB)
 	
 	def putFeed(self,feed):
 		id = _getId(feed['url'])
@@ -113,7 +102,7 @@ class ContentManager(CouchManager):
 		shop['summary'] = shop['summary'].replace('\'','"')
 		return self._putObject('shop',shop,id)
 		
-	def getUnparsedFeeds(self,age=FEEDAGE):
+	def getUnparsedFeeds(self,age=config2.FEEDAGE):
 		# get feeds older than [refresh] hours
 		timespan = timedelta(hours=age)
 		end,_ = _getTimeframe(span=timespan)
@@ -121,7 +110,7 @@ class ContentManager(CouchManager):
 		response = self._getOrPostObject(view=('datetime',view))
 		return _extractValues(response)
 		
-	def getEntriesWithKeywords(self,words,start=None,age=ISSUEAGE+FEEDAGE):
+	def getEntriesWithKeywords(self,words,start=None,age=config2.ISSUEAGE+config2.FEEDAGE):
 		query = set(words)
 		if start:
 			start,end = _getTimeframe(start=start)
@@ -153,7 +142,7 @@ class ContentManager(CouchManager):
 				 results[result['_id']] = result['keywords']
 		return results
 	
-	def deleteOldEntries(self,age=ISSUEAGE*ISSUESSTORED):
+	def deleteOldEntries(self,age=config2.ISSUEAGE*config2.STORED):
 		# delete entries that are too old
 		timespan = timedelta(hours=age)
 		end,_ = _getTimeframe(span=timespan)
@@ -166,7 +155,7 @@ class ContentManager(CouchManager):
 	
 class UserManager(CouchManager):
 	def __init__(self):
-		CouchManager.__init__(self,USERDB)
+		CouchManager.__init__(self,config2.USERDB)
 		
 	def putUser(self,user):
 		id = _getId(user['username'])
@@ -203,7 +192,7 @@ class UserManager(CouchManager):
 		except:
 			return None
 			
-	def getUninformedUsers(self,age=ISSUEAGE):
+	def getUninformedUsers(self,age=config2.ISSUEAGE):
 		# get users whose last update is over [refresh] hours
 		timespan = timedelta(hours=age)
 		end,_ = _getTimeframe(timespan)
@@ -237,7 +226,7 @@ class UserManager(CouchManager):
 		response = self._getOrPostObject(view=('statistics',view))
 		return _extractValues(response)
 		
-	def deleteOldIssues(self,age=ISSUEAGE*ISSUESSTORED):
+	def deleteOldIssues(self,age=config2.ISSUEAGE*config2.STORED):
 		# delete issues that are too old
 		timespan = timedelta(hours=age)
 		end,_ = _getTimeframe(span=timespan)

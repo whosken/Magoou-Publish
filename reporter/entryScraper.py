@@ -6,24 +6,6 @@ from urllib2 import urlopen
 from BeautifulSoup import BeautifulSoup, NavigableString
 from util import *
 
-TIMEOUT = 30 # in secs = 0.5 minutes
-SUMMARYSIZE = 30 # words
-OEMBEDMAPPINGS = [
-					('title','title'),
-					('author','author_name'),
-					('source','provider_name'),
-					('media','url'),
-					('summary','description'),
-					('media','html'),
-					# TODO: add ico
-				]
-OEMBEDTYPES = {
-				'photo':'image',
-				'video':'video',
-				'rich':'rich',
-				'link':'article',
-			}
-
 def scrapeEntry(entry,tryEmbed=True):
 	logMessage(__name__, "scraping " + entry['url'])
 	try:
@@ -40,17 +22,17 @@ def scrapeEntry(entry,tryEmbed=True):
 def _crawlUrl(url,tryEmbed):
 	if tryEmbed:
 		try:
-			return urlopen(_oEmbed(url),timeout=TIMEOUT).read(), True
+			return urlopen(_oEmbed(url),config.TIMEOUT=config.TIMEOUT).read(), True
 		except:
 			pass
-	return urlopen(url,timeout=TIMEOUT).read(), False
+	return urlopen(url,config.TIMEOUT=config.TIMEOUT).read(), False
 
 def _traverseOEmbed(entry,data):
 	if data['type'] == 'error':
 		return scrapeEntry(entry,tryEmbed=False)
 	
-	entry['type'] = OEMBEDTYPES[data['type']]
-	for key,field in OEMBEDMAPPINGS:
+	entry['type'] = config.OEMBEDTYPES[data['type']]
+	for key,field in config.OEMBEDMAPPINGS:
 		if field in data and (key not in entry or entry[key] == ''):
 			entry[key] = data[field]
 	return entry
@@ -119,7 +101,7 @@ def _highlightText(soup):
 			total += ptag[0]
 			yield ptag[1]
 			
-	topPs = list(extract_top_ps(SUMMARYSIZE))
+	topPs = list(extract_top_ps(config.SUMMARYSIZE))
 	
 	highlights = tools.uniqify(list(unicode(p) for p in topPs))
 	return '<br />'.join(highlights), topPs[0].findParent('div')

@@ -1,8 +1,6 @@
 from threading import Thread
 from util import *
 
-THREADLIMIT = 10
-
 def run(storage):
 	try:
 		def startThread(request,storage):
@@ -14,7 +12,7 @@ def run(storage):
 		for feed in storage.getUnparsedFeeds():
 			threads.append(startThread(feed,storage))
 			storage.putFeed(feed)
-			if len(threads) > THREADLIMIT:
+			if len(threads) > config.THREADLIMIT:
 				break
 		
 		for thread in threads:
