@@ -1,6 +1,15 @@
 # editor.py, reporter.py
 THREADLIMIT = 10
 
+# editor.py
+USAGESCORES = {
+				'like':1.25,
+				'want':1.375,
+				'read':1.125,
+				'dislike':0.625,
+				'default':1,
+			}
+
 # keywordgenerator.py
 TITLEWEIGHT = 0.5
 INFOWEIGHT = 0.075
