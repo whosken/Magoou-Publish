@@ -41,17 +41,17 @@ def profileFeed(feed,aboutUrl):
 	feed['keywords'] = generateKeywords(mock)
 	return feed
 	
-def profileObject(object,text=None,url=None):
+def profileObject(object,text=None,url=None,feed=None):
 	if text:
 		object['summary'] = text
 		mock = object
-	elif aboutUrl:
+	elif url:
 		from entryScraper import scrapeEntry
-		mock = scrapeEntry({'url':aboutUrl,'type':'article'})
+		mock = scrapeEntry({'url':url,'type':'article'})
 	from keywordGenerator import generateKeywords
 	object['keywords'] = generateKeywords(mock)
 	return object
-		
+	
 def test():
 	logMessage(__name__,'commence testing!')
 	# testFeed = {

@@ -7,7 +7,6 @@ USAGESCORES = {
 				'want':1.375,
 				'read':1.125,
 				'dislike':0.625,
-				'default':1,
 			}
 
 # keywordgenerator.py
@@ -16,6 +15,7 @@ INFOWEIGHT = 0.075
 SUMMARYWEIGHT = 0.5
 HIGHLIGHTWEIGHT = 0
 CATEGORYWEIGHT = 1
+DISCOUNT = 0.1 # discount of feed keywords
 
 MEHS = ('a','an','the','of','for','i', '', 'this', 'that', 'he', 'she', 'it', 'him', 'her', 'they', 'them', ' ', 'and', 'to', 'in', 'being', 'is', 'his', 'am', 'are')
 

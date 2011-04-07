@@ -60,13 +60,14 @@ def _factorUsage(user,users,contents):
 	for usage in users.getUserUsage(user['username']):
 		if usage['datetime'] < user['datetime']:
 			continue
-		action = usage['action'] if usage['action'] in config.USAGESCORES else 'default'
-		score = config.USAGESCORES[action]
-		id = usage['entryid']
-		if contents.checkDocumentExistence(id):
-			entry = contents.getDocument(id)
-			for word in entry['keywords'].keys():
-				tools.updateDictValue(user['preferences'],word,score,additive=False)
+		action = usage['action'] if usage['action'] in config.USAGESCORES else None
+		if action:
+			score = config.USAGESCORES[action]
+			id = usage['entryid']
+			if contents.checkDocumentExistence(id):
+				entry = contents.getDocument(id)
+				for word in entry['keywords'].keys():
+					tools.updateDictValue(user['preferences'],word,score,additive=False)
 	return user
 	
 def _getMatrix(entries,keys):

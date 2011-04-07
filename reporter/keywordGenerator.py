@@ -8,11 +8,11 @@ def generateKeywords(entry,keywords=None):
 		if not keywords:
 			keywords = {}
 		else:
-			tools.updateDictValues(keywords,0.1,additive=False) # reduce weighting of keywords from feeds
+			tools.updateDictValues(keywords,config.DISCOUNT,additive=False) # reduce weighting of keywords from feeds
 		
 		if 'title' in entry:
 			_collectKeywords(collectTerms(entry['title'],False),keywords,config.TITLEWEIGHT)
-		if entry['type'] == 0: # if content is article
+		if entry['type'] == 'article': # if content is article
 			_collectKeywords(collectTerms(entry['summary']),keywords,config.SUMMARYWEIGHT)
 			if 'highlight' in entry: # if content has been scraped
 				_collectKeywords(collectTerms(entry.pop('highlight')),keywords,config.HIGHLIGHTWEIGHT)
@@ -79,6 +79,14 @@ def test():
 	response = generateKeywords(request[0][0])
 	print response
 	return response
+	
+def test2():
+	import entryScraper
+	request = entryScraper.test2()
+	response = generateKeywords(request)
+	print response
+	return response
 
 if __name__ == '__main__':
-	test()
+	# test()
+	test2()

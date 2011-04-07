@@ -88,14 +88,13 @@ def _traverseXml(feed,xml):
 		yield response, needScrape
 	
 def test():
-	import urllib2
 	url = 'http://feeds.feedburner.com/bigthink/main?format=xml'
 	# url = 'http://xkcd.com/atom.xml'
 	request = {
 				'url':url,
-				'raw':urllib2.urlopen(url).read()
+				'type':'article',
 			}
-	response = parseFeed(**request)
+	response = readFeed(request)
 	print response
 	return response
 

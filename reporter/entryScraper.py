@@ -6,36 +6,17 @@ from urllib2 import urlopen
 from BeautifulSoup import BeautifulSoup, NavigableString
 from util import *
 
-def scrapeEntry(entry,tryEmbed=True):
+def scrapeEntry(entry):
 	logMessage(__name__, "scraping " + entry['url'])
 	try:
-		raw, oEmbed = _crawlUrl(entry['url'],tryEmbed)
-		if oEmbed:
-			data = json.loads(raw)
-			return _traverseOEmbed(entry, data)
-		else:
-			soup = BeautifulSoup(raw)
-			return _traverseHtml(entry, soup)
+		raw = _crawlUrl(entry['url'])
+		soup = BeautifulSoup(raw)
+		return _traverseHtml(entry, soup)
 	except:
 		logError(__name__)
 		
-def _crawlUrl(url,tryEmbed):
-	if tryEmbed:
-		try:
-			return urlopen(_oEmbed(url),config.TIMEOUT=config.TIMEOUT).read(), True
-		except:
-			pass
-	return urlopen(url,config.TIMEOUT=config.TIMEOUT).read(), False
-
-def _traverseOEmbed(entry,data):
-	if data['type'] == 'error':
-		return scrapeEntry(entry,tryEmbed=False)
-	
-	entry['type'] = config.OEMBEDTYPES[data['type']]
-	for key,field in config.OEMBEDMAPPINGS:
-		if field in data and (key not in entry or entry[key] == ''):
-			entry[key] = data[field]
-	return entry
+def _crawlUrl(url):
+	return urlopen(url,timeout=config.TIMEOUT).read()
 	
 def _traverseHtml(entry,soup):
 	if 'icon' not in entry:
@@ -65,38 +46,24 @@ def _traverseHtml(entry,soup):
 		entry['media'] = unicode(media)
 	if 'summary' not in entry:
 		entry['summary'] = tools.cleanText(entry['highlight'])
+		entry.pop('highlight')
 	return entry
 
 def _highlightText(soup):
 	# find the no-comment <div> and extract few <p> with highest word count
 	ptags = []
-	for p in findAllTags(soup.body,'p'):
-		# filter out comments
-		skip = False
-		for div in p.findParents('div'):
-			divClass = getAttribute(div,'class')
-			if divClass and divClass.count('comment') > 0:
-				skip = True
-				break
-		if skip:
-			continue
-
-		if not len(p.contents) > 0:
-			continue
+	for p in findAllTags(soup.body,'p'):		
 		text = unicode(p)
 		if text.count('<script') > 0:
-			continue
-		
-		score = 0
-		for content in p.contents:
-			if isinstance(content,NavigableString):
-				score += len(content.split())
-		ptags.append((score,p))
+			continue		
+		texts = tools.cleanText(text)
+		score = float(len(texts.split()))
+		ptags.append((score, p))
 	
-	def extract_top_ps(wordsSize):
+	def extract_top_ps(size):
 		total = 0
 		for ptag in sorted(ptags,key=itemgetter(0),reverse=True):
-			if total > wordsSize:
+			if total > size:
 				break
 			total += ptag[0]
 			yield ptag[1]
@@ -130,9 +97,6 @@ def _highlightMedia(soup,type,div):
 			return image, 'image', description
 
 	return None, None, None
-
-def _oEmbed(url):
-	return 'http://api.embed.ly/1/oembed?url={0}'.format(url)
 	
 def findAllTags(tag,regex):
 	results = tag.findAll(re.compile(regex.lower()))
@@ -172,12 +136,18 @@ def findMeta(tag,attributes=None,name=None):
 	return unicode(tag.findAll('meta',attrs={'name':name})[0]['content'])
 	
 def test():
-	import urllib2
-	request = list(entry for entry in feedParser.test())[0][0]
-	raw = urllib2.urlopen(request['url']).read()
-	response = scrapeEntry(request,raw)
+	import feedReader
+	request = list(entry for entry in feedReader.test())[0][0]
+	response = scrapeEntry(request)
+	print response
+	return response
+	
+def test2():
+	url = 'http://www.informationisbeautiful.net/about/'
+	response = scrapeEntry({'url':url,'type':'article'})
 	print response
 	return response
 
 if __name__ == '__main__':
 	test()
+	test2()

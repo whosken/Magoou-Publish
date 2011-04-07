@@ -43,6 +43,9 @@ HTMLCODES = (
 				("'", '&#39;'),
 				('>>', '&raquo;'),
 				('/', '&frasl;'),
+				(' ', '&nbsp;'),
+				("'", '&#8217;'),
+				('--', '&#8211;'),
 			)
 	
 def htmlDecode(string,encode=False):
