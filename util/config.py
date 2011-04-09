@@ -24,21 +24,6 @@ SUMMARYSIZE = 30 # words
 
 # entryscraper.py
 TIMEOUT = 30 # in secs = 0.5 minutes
-OEMBEDMAPPINGS = [
-					('title','title'),
-					('author','author_name'),
-					('source','provider_name'),
-					('media','url'),
-					('summary','description'),
-					('media','html'),
-					# TODO: add ico
-				]
-OEMBEDTYPES = {
-				'photo':'image',
-				'video':'video',
-				'rich':'rich',
-				'link':'article',
-			}
 
 # ensemble.py
 ALPHAS = {
