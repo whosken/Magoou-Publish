@@ -63,12 +63,11 @@ def collectTerms(string,nGram=True):
 def _filteredTerms(tokens): #TODO: use better NLP algorithms
 	for token in tokens:
 		#not an oversaturated word
-		if not token.lower() in config.MEHS:
-			if len(token) > 1:
-				yield token.strip()
+		if len(token) > 1:
+			yield token.strip()
 			
 def _weightTerm(term,docLength,bonus): #TODO: use better weightings
-	termLength = term.count(" ") + 1
+	termLength = term.count(' ') + 1
 	charLength = len(term)
 	#update term weight by log(character length + bonus) * term length -- tf weights
 	return log1p(charLength + bonus)*termLength/docLength

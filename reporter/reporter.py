@@ -33,24 +33,15 @@ def _runReport(feed,storage):
 			scrapeEntry(entry)
 		entry['keywords'] = generateKeywords(entry,feedKeywords)
 		storage.putEntry(entry)
-		
-def profileFeed(feed,aboutUrl):
-	from keywordGenerator import generateKeywords
-	from entryScraper import scrapeEntry
-	mock = scrapeEntry({'url':aboutUrl,'type':'article'})
-	feed['keywords'] = generateKeywords(mock)
-	return feed
 	
-def profileObject(object,text=None,url=None,feed=None):
+def profileObject(text=None,url=None):
 	if text:
-		object['summary'] = text
-		mock = object
+		mock = {'url':text[:20],'type':'article','summary':text}
 	elif url:
 		from entryScraper import scrapeEntry
 		mock = scrapeEntry({'url':url,'type':'article'})
 	from keywordGenerator import generateKeywords
-	object['keywords'] = generateKeywords(mock)
-	return object
+	return generateKeywords(mock)
 	
 def test():
 	logMessage(__name__,'commence testing!')

@@ -20,8 +20,11 @@ def _traverseXml(feed,xml):
 					'source':xml.feed.title,
 					'type':'article', # assume entry is article
 					'title':entry.title,
-					'datetime':datetime(*entry.date_parsed[:6]),
 				}
+		try:
+			response['datetime'] = datetime(*entry.date_parsed[:6])
+		except AttributeError:
+			response['datetime'] = datetime.now()
 				
 		# parse url
 		if not entry.link.count('feedproxy') > 0:

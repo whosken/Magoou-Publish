@@ -1,5 +1,6 @@
 from math import sqrt
 from operator import *
+from datetime import datetime
 import re
 import json
 
@@ -28,13 +29,39 @@ def uniqify(list):
 	map(set.__setitem__,list,[])
 	return set.keys()
 	
-def jsonify(object):
-	if type(object) is dict:
-		object = cleanDict(object)
-	elif type(object) is type(i for i in range(0)):
-		object = list(object)
-	return json.dumps(object)
+def jsonify(instance):
+	def simplify(object):
+		if type(object) is dict:
+			object = cleanDict(object)
+			for key,value in object.items():
+				object[key] = simplify(value)
+		elif type(object) is type(i for i in range(0)):
+			object = simplify(list(object))
+		elif type(object) is list:
+			for value in object:
+				value = simplify(value)
+		elif isinstance(object,datetime):
+			object = formatDateTime(object)
+		return object
+	return json.dumps(simplify(instance))
 
+def formatDateTime(dt):
+	if isinstance(dt,datetime):
+		return [dt.year,dt.month,dt.day,dt.hour,dt.minute,dt.second]
+	elif type(dt) is list:
+		return dt
+	
+def jsonToDateTime(list):
+	args = {
+			'year':list[0],
+			'month':list[1],
+			'day':list[2],
+			'hour':list[3],
+			'minute':list[4],
+			'second':list[5],
+		}
+	return datetime(**args)
+	
 HTMLCODES = (
 				('&', '&amp;'),
 				('<', '&lt;'),

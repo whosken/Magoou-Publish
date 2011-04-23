@@ -1,17 +1,20 @@
 import sys
-import traceback
-import logging 
+import logging
+from datetime import datetime
 
 # TODO: use logging module
 def logMessage(component, message):
 	if type(message) not in (unicode,str):
 		message = unicode(message)
-	return _writeToLog(''.join((component, ': ', message)))
+	return _writeToLog(_form_message(component,message))
 
 def logError(component):
-	message = _writeToLog(' '.join(('ERROR: ', component, ': ', repr(sys.exc_info()[1]))))
+	message = _writeToLog(_form_message(component,repr(sys.exc_info()[1])))
 	_sendNotice(message)
 	raise
+	
+def _form_message(header,message):
+	return '{0} - {1}: {2}'.format(datetime.now().strftime('%y-%m-%d %H:%M:%S'),header,message)
 	
 def _writeToLog(message):
 	print message # TODO: write to file

@@ -17,8 +17,6 @@ HIGHLIGHTWEIGHT = 0
 CATEGORYWEIGHT = 1
 DISCOUNT = 0.1 # discount of feed keywords
 
-MEHS = ('a','an','the','of','for','i', '', 'this', 'that', 'he', 'she', 'it', 'him', 'her', 'they', 'them', ' ', 'and', 'to', 'in', 'being', 'is', 'his', 'am', 'are')
-
 # feedreader.py entryscraper.py
 SUMMARYSIZE = 30 # words
 
