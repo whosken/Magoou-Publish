@@ -24,11 +24,6 @@ def dot(one,two):
 def magnitude(list):
 	return sqrt(dot(list,list))
 
-def uniqify(list):
-	set = {}
-	map(set.__setitem__,list,[])
-	return set.keys()
-	
 def jsonify(instance):
 	def simplify(object):
 		if type(object) is dict:
@@ -88,7 +83,7 @@ def removeTags(string):
 	
 def cleanText(string):
 	string = removeTags(string)
-	string = string.decode('utf-8').strip()
+	string = string.strip()
 	return unicode(string)
 	
 def updateDictValue(dict,key,value,additive=True):

@@ -11,7 +11,6 @@ def run(storage):
 		threads = []
 		for feed in storage.getUnparsedFeeds():
 			threads.append(startThread(feed,storage))
-			storage.putFeed(feed)
 			if len(threads) > config.THREADLIMIT:
 				break
 		
@@ -21,6 +20,8 @@ def run(storage):
 		logError(__name__)
 
 def _runReport(feed,storage):
+	bag = storage.getKeywordWeights()
+	
 	from feedReader import readFeed
 	from keywordGenerator import generateKeywords
 	from entryScraper import scrapeEntry
@@ -31,8 +32,9 @@ def _runReport(feed,storage):
 			continue
 		if needScrape:
 			scrapeEntry(entry)
-		entry['keywords'] = generateKeywords(entry,feedKeywords)
+		entry['keywords'] = generateKeywords(entry,bag=bag,keywords=feedKeywords)
 		storage.putEntry(entry)
+	storage.putFeed(feed)
 	
 def profileObject(text=None,url=None):
 	if text:
@@ -45,16 +47,9 @@ def profileObject(text=None,url=None):
 	
 def test():
 	logMessage(__name__,'commence testing!')
-	# testFeed = {
-				# 'url':'http://www.creativeboom.co.uk/feed/',
-				# 'type':1
-			# }
-	# from storage.managers import ContentManager
-	# with ContentManager() as storage:
-		# storage.putFeed(testFeed)
-	# logMessage(__name__,'done creating mock feed!')
-	
-	run()
+	from storage.couchManager import ContentManager
+	with ContentManager() as content:
+		run(content)
 	logMessage(__name__,'finished testing!')
 
 if __name__ == '__main__':

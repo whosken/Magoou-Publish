@@ -1,41 +1,28 @@
 from util import *
 
-def scoreEntries(prefers,matrix):
+def scoreEntries(prefers,matrix,wordBag):
 	try:
-		return _languageModel(prefers,matrix)
+		return _languageModel(prefers,matrix,wordBag)
 	except:
 		logError(__name__)
 	
-def _languageModel(prefers,wordDocWeight):
+def _languageModel(prefers,docWordWeight,wordWeight):
 	# language model with dirichlet smoothing
 	
-	wordWeight = {} # word per all doc
 	docWeight = {} # weight per doc
 	totalWeight = 0
-	totalPrefers = sum(prefers.values())
-	
-	for id in wordDocWeight:
-		for word in wordDocWeight[id]:
-			weight = wordDocWeight[id][word]
-			if word in prefers:
-				weight *= prefers[word] / totalPrefers
-			
-			# update weight of the word
-			tools.updateDictValue(wordWeight,word,weight)
-			
-			#update weight of the character
-			tools.updateDictValue(docWeight,id,weight)
-			
-			wordDocWeight[id][word] = weight
-			totalWeight += weight
+	for id,doc in docWordWeight.items():
+		tools.mergeDict(doc,prefers,additive=False)
+		docWeight[id] = sum(doc.values())
+		totalWeight += docWeight[id]
 	
 	candidates = {}
-	for id in wordDocWeight:
+	for id in docWordWeight:
 		weight = 1
-		if word in wordDocWeight[id]:
-			weight *= _getScore(wordDocWeight[id][word],wordWeight[word],docWeight[id],totalWeight)
+		for word in docWordWeight[id]:
+			weight *= _getScore(docWordWeight[id][word],wordWeight[word],docWeight[id],totalWeight)
 		candidates[id] = weight
 	return candidates
 	
-def _getScore(wordDocWeight,wordWeight,docWeight,totalWeight):
-	return (wordDocWeight*totalWeight + wordWeight*docWeight) / (docWeight+totalWeight)
+def _getScore(docWordWeight,wordWeight,docWeight,totalWeight):
+	return (docWordWeight*totalWeight + wordWeight*docWeight) / (docWeight+totalWeight)

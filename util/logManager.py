@@ -14,7 +14,7 @@ def logError(component):
 	raise
 	
 def _form_message(header,message):
-	return '{0} - {1}: {2}'.format(datetime.now().strftime('%y-%m-%d %H:%M:%S'),header,message)
+	return '{0} -- {1}: {2}'.format(datetime.now().strftime('%y-%m-%d %H:%M:%S'),header,message)
 	
 def _writeToLog(message):
 	print message # TODO: write to file

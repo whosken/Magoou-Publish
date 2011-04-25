@@ -10,21 +10,32 @@ USAGESCORES = {
 			}
 
 # keywordgenerator.py
-TITLEWEIGHT = 0.5
-INFOWEIGHT = 0.075
-SUMMARYWEIGHT = 0.5
-HIGHLIGHTWEIGHT = 0
-CATEGORYWEIGHT = 1
-DISCOUNT = 0.1 # discount of feed keywords
+BONUSES = {
+			'title': 0.5,
+			'info': 0.075,
+			'summary': 0.5,
+			'highlight': 0,
+			'category': 1,
+		}
+
+FEEDDISCOUNT = 0.1 # discount of feed keywords
+NEARDISCOUNT = 0.5 # discount of nearby keywords
+DISTANCE = 0.3 # word distance threshold
+LENGTH = 3 # word length to be considering distance
+NAIVECHUNK = ('zh','jp','kr','zn') # languages that requires naive chunking
 
 # feedreader.py entryscraper.py
 SUMMARYSIZE = 30 # words
 
 # entryscraper.py
-TIMEOUT = 30 # in secs = 0.5 minutes
+TIMEOUT = 90 # in secs = 1.5 minutes
 
 # ensemble.py
 ALPHAS = {
 			'languageModel':1.5,
 			'cosSim':1,
+		}
+BETAS = {
+			'item':('languageModel','cosSim'),
+			'user':(),
 		}

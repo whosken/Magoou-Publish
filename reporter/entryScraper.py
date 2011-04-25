@@ -13,7 +13,10 @@ def scrapeEntry(entry):
 		soup = BeautifulSoup(raw)
 		return _traverseHtml(entry, soup)
 	except:
-		logError(__name__)
+		try: # continues process after logging error
+			logError(__name__)
+		except:
+			pass
 		
 def _crawlUrl(url):
 	return urlopen(url,timeout=config.TIMEOUT).read()
@@ -33,12 +36,12 @@ def _traverseHtml(entry,soup):
 	
 	entry['highlight'], div = _highlightText(soup)
 	
+	media, type, highlight = _highlightMedia(soup,entry['type'],div)
+	
 	# assume it's a media if there aren't much text
 	if entry['type'] == 'article' and len(entry['highlight']) < 10:
 		entry['type'] = type
 		return _traverseHtml(entry,soup)
-	
-	media, type, highlight = _highlightMedia(soup,entry['type'],div)
 	
 	if highlight and ('highlight' not in entry):
 		entry['highlight'] = unicode(highlight)
@@ -52,13 +55,14 @@ def _traverseHtml(entry,soup):
 def _highlightText(soup):
 	# find the no-comment <div> and extract few <p> with highest word count
 	ptags = []
-	for p in findAllTags(soup.body,'p'):		
-		text = unicode(p)
-		if text.count('<script') > 0:
-			continue		
-		texts = tools.cleanText(text)
-		score = float(len(texts.split()))
-		ptags.append((score, p))
+	if soup.body:
+		for p in findAllTags(soup.body,'p'):
+			text = unicode(p)
+			if text.count('<script') > 0:
+				continue		
+			texts = tools.cleanText(text)
+			score = float(len(texts.split()))
+			ptags.append((score, p))
 	
 	def extract_top_ps(size):
 		total = 0
@@ -70,7 +74,7 @@ def _highlightText(soup):
 			
 	topPs = list(extract_top_ps(config.SUMMARYSIZE))
 	
-	highlights = tools.uniqify(list(unicode(p) for p in topPs))
+	highlights = set(unicode(p) for p in topPs)
 	return '<br />'.join(highlights), topPs[0].findParent('div')
 	
 def _highlightMedia(soup,type,div):

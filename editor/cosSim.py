@@ -1,4 +1,5 @@
 from util import *
+from copy import deepcopy
 
 def scoreEntries(query,matrix):
 	try:
@@ -8,8 +9,10 @@ def scoreEntries(query,matrix):
 	
 def _cosSim(query,matrix):
 	# cos-sim = A dot B / |A||B|
+	
+	# TODO: solve curse of dimensionality
 	queryMag = tools.magnitude(query.values())
-	queryVec = query.values()
+	queryVec = deepcopy(query.values())
 	
 	candidates = {}
 	for id in matrix:
