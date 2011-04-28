@@ -34,15 +34,9 @@ def runEdit(user,users,contents):
 	
 def selectCandidates(prefer,users,contents):
 	entries = contents.getLatestEntries()
+	pool = _getPool(entries)
 	wordBag = contents.getKeywordWeights()
 	preferBag = users.getPreferenceWeights()
-	
-	pool = {}
-	for entry in entries:
-		pool[entry['_id']] = entry['keywords']
-	if not len(pool) > 0:
-		logMessage(__name__,'No entries found! Try run reporter first')
-		return {}
 	
 	# standardization
 	words = set(prefer.keys() + wordBag.keys())
@@ -57,8 +51,8 @@ def selectCandidates(prefer,users,contents):
 	import ensemble
 	
 	candidates = {}
-	candidates['languageModel'] = lang.scoreEntries(query,matrix,wordBag)
 	candidates['cosSim'] = cos.scoreEntries(query,matrix)
+	candidates['languageModel'] = lang.scoreEntries(query,matrix,wordBag)
 	
 	return ensemble.scoreEntries(candidates,prefer,preferBag,pool,wordBag)
 	
@@ -76,6 +70,15 @@ def _factorUsage(user,users,contents):
 				for word in entry['keywords'].keys():
 					tools.updateDictValue(user['preferences'],word,score,additive=False)
 	return user
+	
+def _getPool(entries):
+	# return a map from entry id to keywords
+	pool = {}
+	for entry in entries:
+		pool[entry['_id']] = entry['keywords']
+	if not len(pool) > 0:
+		raise Exception ,'No entries found! Try run reporter first'
+	return pool
 	
 def _getMatrix(entries,keys):
 	# returns a matrix where each value is a dict with words not in value are 0

@@ -11,8 +11,13 @@ def _ensembleScores(candidates,prefer,preferBag,pool,wordBag):
 	for component,entries in candidates.items():
 		alpha = config.ALPHAS[component] if component in config.ALPHAS else 1
 		total = sum(entries.values())
-		for id,score in entries.items():
-			beta = len(pool[id]) / len(wordBag) if component in config.BETAS['item'] else len(prefer) / len(preferBag)
-			weight = score * alpha * beta / total
-			tools.updateDictValue(release,id,weight)
+		if total > 0:
+			for id,score in entries.items():
+				beta = len(pool[id]) / len(wordBag) if component in config.BETAS['item'] else len(prefer) / len(preferBag)
+				weight = score * alpha * beta / total
+				tools.updateDictValue(release,id,weight)
+		else:
+			print component
+			print entries
+			raise Exception, 'No entries are recommended to the user'
 	return release

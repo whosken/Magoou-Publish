@@ -50,13 +50,16 @@ def _collectKeywords(terms,words,bonus=0,calcWeight=True):
 			words = tools.updateDictValue(words,term,bonus)
 	return words
 	
+cache = {} # cache for word distances
 def _getNearTerms(words,bag):
 	for word in deepcopy(words):
-		if len(word) < config.LENGTH:
-			continue
-		for term,score in bag.items():
-			if _calcWordDistance(word,term) < config.DISTANCE:
-				tools.updateDictValue(words,term,score * config.NEARDISCOUNT)
+		if len(word) > config.LENGTH:
+			for term,score in bag.items():
+				key = sorted((word,term))
+				if key not in cache:
+					cache[key] = _calcWordDistance(word,term) < config.DISTANCE
+				if cache[key]:
+					tools.updateDictValue(words,term,score * config.NEARDISCOUNT)
 	return words
 	
 def collectTerms(string,ngram=True,naive=False):
@@ -90,9 +93,28 @@ def _weightTerm(term,docLength,bonus): #TODO: use better weightings
 	#update term weight by log(character length + bonus) * term length -- tf weights
 	return log1p(charLength + bonus)*termLength/docLength
 	
-def _calcWordDistance(word,term):
-	# TODO: do it
-	return 0
+def _calcWordDistance(first,second):
+	# find the Levenstein distance between two strings
+    if len(first) > len(second):
+        first, second = second, first
+    if len(second) == 0:
+        return 1
+    first_length = len(first) + 1
+    second_length = len(second) + 1
+    distance_matrix = [[0] * second_length for x in range(first_length)]
+    for i in range(first_length):
+        distance_matrix[i][0] = i
+    for j in range(second_length):
+        distance_matrix[0][j]=j
+    for i in xrange(1, first_length):
+        for j in range(1, second_length):
+            deletion = distance_matrix[i-1][j] + 1
+            insertion = distance_matrix[i][j-1] + 1
+            substitution = distance_matrix[i-1][j-1]
+            if first[i-1] != second[j-1]:
+                substitution += 1
+            distance_matrix[i][j] = min(insertion, deletion, substitution)
+    return float(distance_matrix[first_length-1][second_length-1]) / float(len(second))
 
 def test():
 	import feedReader

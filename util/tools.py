@@ -1,25 +1,15 @@
 from math import sqrt
 from operator import *
+from itertools import *
 from datetime import datetime
 import re
 import json
 
-def prod(one,two):
-	return reduce(lambda x, y: x*y, list)
+def prod(one):
+	return reduce(mul, one)
 	
 def dot(one,two):
-	if len(one) != len(two):
-		raise Exception('different length vectors')
-	
-	if type(one[0]) is iter or type(two[0]) is iter:
-		product = dot(one[0]*two[0])
-	else:
-		product = float(one[0]) * float(two[0])
-	
-	if len(one) > 1:
-		return product + dot(one[1:],two[1:])
-	else:
-		return product
+	return sum(imap(mul,one,two))
 	
 def magnitude(list):
 	return sqrt(dot(list,list))

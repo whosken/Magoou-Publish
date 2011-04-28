@@ -10,9 +10,8 @@ def scoreEntries(query,matrix):
 def _cosSim(query,matrix):
 	# cos-sim = A dot B / |A||B|
 	
-	# TODO: solve curse of dimensionality
 	queryMag = tools.magnitude(query.values())
-	queryVec = deepcopy(query.values())
+	queryVec = query.values()
 	
 	candidates = {}
 	for id in matrix:
@@ -20,5 +19,5 @@ def _cosSim(query,matrix):
 		vectorMag = tools.magnitude(vector)
 		dotProd = tools.dot(queryVec,vector)
 		if dotProd:
-			candidates[id] = dotProd / (queryMag * vectorMag)
+			candidates[id] = float(dotProd) / float(queryMag * vectorMag)
 	return candidates
