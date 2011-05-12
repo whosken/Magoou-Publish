@@ -1,10 +1,13 @@
-from util import *
+from publish.util import *
 
 def scoreEntries(candidates,*args):
-	try: # TODO: mlp?
+	try:
 		return _ensembleScores(candidates,*args)
 	except:
 		logError(__name__)
+		
+# TODO: implement collaborative filtering
+# TODO: implement latent dirichlet allocation
 	
 def _ensembleScores(candidates,prefer,preferBag,pool,wordBag):
 	release = {}

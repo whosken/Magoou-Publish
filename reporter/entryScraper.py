@@ -4,7 +4,7 @@ from operator import *
 from datetime import *
 from urllib2 import urlopen
 from BeautifulSoup import BeautifulSoup, NavigableString
-from util import *
+from publish.util import *
 
 def scrapeEntry(entry):
 	logMessage(__name__, "scraping " + entry['url'])

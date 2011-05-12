@@ -1,23 +1,8 @@
-from threading import Thread
-from util import *
+from publish.util.threadManager import runThreads
+from publish.util import *
 
 def run(storage):
-	try:
-		def startThread(request,storage):
-			thread = Thread(target=_runReport,args=(request,storage,))
-			thread.start()
-			return thread
-		
-		threads = []
-		for feed in storage.getUnparsedFeeds():
-			threads.append(startThread(feed,storage))
-			if len(threads) > config.THREADLIMIT:
-				break
-		
-		for thread in threads:
-			thread.join()
-	except:
-		logError(__name__)
+	runThreads(_runReport,storage.getUnparsedFeeds,storage)
 
 def _runReport(feed,storage):
 	bag = storage.getKeywordWeights()
@@ -26,13 +11,13 @@ def _runReport(feed,storage):
 	from keywordGenerator import generateKeywords
 	from entryScraper import scrapeEntry
 	
-	feedKeywords = feed['keywords'] if 'keywords' in feed else None
-	for entry, needScrape in readFeed(feed):
+	feed_keywords = feed['keywords'] if 'keywords' in feed else None
+	for entry, need_scrape in readFeed(feed):
 		if storage.checkDocumentExistence(None,key=entry['url']):
 			continue
-		if needScrape:
+		if need_scrape:
 			scrapeEntry(entry)
-		entry['keywords'] = generateKeywords(entry,bag=bag,keywords=feedKeywords)
+		entry['keywords'] = generateKeywords(entry,bag=bag,keywords=feed_keywords)
 		storage.putEntry(entry)
 	storage.putFeed(feed)
 	
@@ -47,8 +32,8 @@ def profileObject(text=None,url=None):
 	
 def test():
 	logMessage(__name__,'commence testing!')
-	from storage.couchManager import ContentManager
-	with ContentManager() as content:
+	from util.storage import Storage
+	with Storage() as content:
 		run(content)
 	logMessage(__name__,'finished testing!')
 

@@ -1,6 +1,6 @@
+from publish.util import *
 from math import log1p
 from copy import deepcopy
-from util import *
 import re
 
 def generateKeywords(entry,bag=None,keywords=None):

@@ -1,5 +1,4 @@
-from util import *
-from copy import deepcopy
+from publish.util import *
 
 def scoreEntries(query,matrix):
 	try:

@@ -1,46 +1,31 @@
-from threading import Thread
+from publish.util.threadManager import runThreads
+from publish.util import *
 from copy import deepcopy
-from util import *
 
-def run(users,contents):
-	try:
-		def startThread(request,users,contents):
-			thread = Thread(target=runEdit,args=(request,users,contents,))
-			thread.start()
-			return thread
-		
-		threads = []
-		for user in users.getUninformedUsers():
-			user = _factorUsage(user,users,contents)
-			threads.append(startThread(user,users,contents))
-			if len(threads) > config.THREADLIMIT:
-				break
-			
-		for thread in threads:
-			thread.join()
-	except:
-		logError(__name__)
+def run(storage):
+	runThreads(runEdit,storage.getUnprocessedProfiles,storage)
 
-def runEdit(user,users,contents):
-	release = selectCandidates(user['preferences'],users,contents)
+def runEdit(profile,storage):
+	release = selectCandidates(profile['topics'],storage)
 	issue = {
-				'username':user['username'],
+				'username':profile.['username'],
 				'entries':release,
-				'public':user['public'] if 'public' in user else None,
 			}
-	result = users.putIssue(issue)
-	users.putUser(user)
+	if hasattr(user,'public'):
+		issue['public'] = user.public
+	result = storage.putIssue(issue)
+	storage.putUser(user)
 	return result
 	
-def selectCandidates(prefer,users,contents):
-	entries = contents.getLatestEntries()
+def selectCandidates(topics,storage):
+	entries = storage.getLatestEntries()
 	pool = _getPool(entries)
-	wordBag = contents.getKeywordWeights()
-	preferBag = users.getPreferenceWeights()
+	wordBag = storage.getKeywordWeights()
+	topicBag = storage.getTopicWeights()
 	
 	# standardization
-	words = set(prefer.keys() + wordBag.keys())
-	query = deepcopy(prefer)
+	words = set(topics.keys() + wordBag.keys())
+	query = deepcopy(topics)
 	tools.updateDictValues(query,1.0/sum(query.values()),additive=False) # nornmalize query
 	tools.completeDict(query,words,default=0)
 	tools.completeDict(wordBag,words,default=0)
@@ -54,22 +39,23 @@ def selectCandidates(prefer,users,contents):
 	candidates['cosSim'] = cos.scoreEntries(query,matrix)
 	candidates['languageModel'] = lang.scoreEntries(query,matrix,wordBag)
 	
-	return ensemble.scoreEntries(candidates,prefer,preferBag,pool,wordBag)
+	return ensemble.scoreEntries(candidates,topics,topicBag,pool,wordBag)
 	
-def _factorUsage(user,users,contents):
+# to do, move out of editor
+def _factorFeedback(profile,storage):
 	# base on the action, reward each keyword
-	for usage in users.getUserUsage(user['username']):
-		if usage['datetime'] < user['datetime']:
+	for feedback in storage.getUserFeedbacks(profile['username']):
+		if feedback['datetime'] < profile['datetime']:
 			continue
-		action = usage['action'] if usage['action'] in config.USAGESCORES else None
+		action = feedback['action'] if feedback['action'] in config.USAGESCORES else None
 		if action:
 			score = config.USAGESCORES[action]
-			id = usage['entryid']
+			id = feedback['entryid']
 			if contents.checkDocumentExistence(id):
 				entry = contents.getDocument(id)
 				for word in entry['keywords'].keys():
-					tools.updateDictValue(user['preferences'],word,score,additive=False)
-	return user
+					tools.updateDictValue(profile['topics'],word,score,additive=False)
+	return profile
 	
 def _getPool(entries):
 	# return a map from entry id to keywords
@@ -95,11 +81,9 @@ def _updateKeywordWeights(candidates,keywords):
 	
 def test():
 	logMessage(__name__,'commence testing!')
-
-	from storage.couchManager import UserManager, ContentManager
-	with UserManager() as users:
-		with ContentManager() as contents:
-			run(users,contents)
+	from util.storage import Storage
+	with Storage() as storage:
+		run(storage)
 	logMessage(__name__,'finished testing!')
 	
 if __name__ == '__main__':

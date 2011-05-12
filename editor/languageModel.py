@@ -1,20 +1,20 @@
-from util import *
+from publish.util import *
 from math import exp
 from copy import deepcopy
 
-def scoreEntries(prefers,matrix,wordBag):
+def scoreEntries(topics,matrix,wordBag):
 	try:
-		return _languageModel(prefers,matrix,wordBag)
+		return _languageModel(topics,matrix,wordBag)
 	except:
 		logError(__name__)
 	
-def _languageModel(prefers,matrix,wordWeight):
+def _languageModel(topics,matrix,wordWeight):
 	# language model with dirichlet smoothing
 	docWordWeight = deepcopy(matrix)
 	docWeight = {} # weight per doc
-	totalWeight = 0
+	totalWeight = 0	
 	for id,doc in docWordWeight.items():
-		tools.mergeDict(doc,prefers,additive=False)
+		tools.mergeDict(doc,topics,additive=False)
 		docWeight[id] = sum(doc.values())
 		totalWeight += docWeight[id]
 	

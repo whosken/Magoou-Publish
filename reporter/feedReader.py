@@ -1,7 +1,7 @@
 import re
 from datetime import *
 import feedparser
-from util import *
+from publish.util import *
 
 def readFeed(feed):
 	logMessage(__name__, 'reading ' + feed['url'])
