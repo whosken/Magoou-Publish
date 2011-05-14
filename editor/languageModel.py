@@ -2,11 +2,13 @@ from publish.util import *
 from math import exp
 from copy import deepcopy
 
+configLogging(__name__)
+
 def scoreEntries(topics,matrix,wordBag):
 	try:
 		return _languageModel(topics,matrix,wordBag)
-	except:
-		logError(__name__)
+	except Exception, e:
+		critical(e)
 	
 def _languageModel(topics,matrix,wordWeight):
 	# language model with dirichlet smoothing

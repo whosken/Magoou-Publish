@@ -2,7 +2,7 @@
 THREADLIMIT = 10
 
 # editor.py
-USAGESCORES = {
+FEEDBACKSCORES = {
 				'like':1.25,
 				'want':1.375,
 				'read':1.125,
@@ -22,7 +22,7 @@ FEEDDISCOUNT = 0.1 # discount of feed keywords
 NEARDISCOUNT = 0.5 # discount of nearby keywords
 DISTANCE = 0.3 # word distance threshold
 LENGTH = 3 # word length to be considering distance
-NAIVECHUNK = ('zh','jp','kr','zn') # languages that requires naive chunking
+NAIVECHUNK = ('zh','ja','kr') # languages that requires naive chunking
 
 # feedreader.py entryscraper.py
 SUMMARYSIZE = 30 # words

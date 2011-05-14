@@ -1,6 +1,7 @@
-from publish.util.threadManager import runThreads
 from publish.util import *
 from copy import deepcopy
+
+configLogging(__name__)
 
 def run(storage):
 	runThreads(runEdit,storage.getUnprocessedProfiles,storage)
@@ -11,8 +12,6 @@ def runEdit(profile,storage):
 				'username':profile.['username'],
 				'entries':release,
 			}
-	if hasattr(user,'public'):
-		issue['public'] = user.public
 	result = storage.putIssue(issue)
 	storage.putUser(user)
 	return result
@@ -47,9 +46,9 @@ def _factorFeedback(profile,storage):
 	for feedback in storage.getUserFeedbacks(profile['username']):
 		if feedback['datetime'] < profile['datetime']:
 			continue
-		action = feedback['action'] if feedback['action'] in config.USAGESCORES else None
+		action = feedback['action'] if feedback['action'] in config.FEEDBACKSCORES else None
 		if action:
-			score = config.USAGESCORES[action]
+			score = config.FEEDBACKSCORES[action]
 			id = feedback['entryid']
 			if contents.checkDocumentExistence(id):
 				entry = contents.getDocument(id)
@@ -80,11 +79,11 @@ def _updateKeywordWeights(candidates,keywords):
 	return keywords
 	
 def test():
-	logMessage(__name__,'commence testing!')
+	info('commence testing!')
 	from util.storage import Storage
 	with Storage() as storage:
 		run(storage)
-	logMessage(__name__,'finished testing!')
+	info('finished testing!')
 	
 if __name__ == '__main__':
 	test()

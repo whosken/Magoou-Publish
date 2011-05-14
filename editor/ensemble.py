@@ -1,10 +1,12 @@
 from publish.util import *
 
+configLogging(__name__)
+
 def scoreEntries(candidates,*args):
 	try:
 		return _ensembleScores(candidates,*args)
-	except:
-		logError(__name__)
+	except Exception, e:
+		critical(e)
 		
 # TODO: implement collaborative filtering
 # TODO: implement latent dirichlet allocation

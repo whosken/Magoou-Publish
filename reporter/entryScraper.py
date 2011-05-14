@@ -6,17 +6,16 @@ from urllib2 import urlopen
 from BeautifulSoup import BeautifulSoup, NavigableString
 from publish.util import *
 
+configLogging(__name__)
+
 def scrapeEntry(entry):
-	logMessage(__name__, "scraping " + entry['url'])
+	info('scraping ' + entry['url'])
 	try:
 		raw = _crawlUrl(entry['url'])
 		soup = BeautifulSoup(raw)
 		return _traverseHtml(entry, soup)
-	except:
-		try: # continues process after logging error
-			logError(__name__)
-		except:
-			pass
+	except Exception, e:
+		error(e) # continues process after logging error
 		
 def _crawlUrl(url):
 	return urlopen(url,timeout=config.TIMEOUT).read()

@@ -3,9 +3,12 @@ from math import log1p
 from copy import deepcopy
 import re
 
+configLogging(__name__)
+
 def generateKeywords(entry,bag=None,keywords=None):
-	logMessage(__name__, "selecting keywords from " + entry['url'])
-	try: # TODO: consider better hieuristics for assigning bonuses
+	info("selecting keywords from " + entry['url'])
+	try:
+		# TODO: consider better hieuristics for assigning bonuses
 		if not keywords:
 			keywords = {}
 		else:
@@ -38,8 +41,8 @@ def generateKeywords(entry,bag=None,keywords=None):
 			_getNearTerms(keywords,bag)
 		
 		return keywords
-	except:
-		logError(__name__)
+	except Exception, e:
+		critical(e)
 	
 def _collectKeywords(terms,words,bonus=0,calcWeight=True):
 	for term in terms:

@@ -1,8 +1,12 @@
-from publish.util.threadManager import runThreads
 from publish.util import *
 
+configLogging(__name__)
+
 def run(storage):
-	runThreads(_runReport,storage.getUnparsedFeeds,storage)
+	try:
+		runThreads(_runReport,storage.getUnparsedFeeds,storage)
+	except Exception,e:
+		critical(e)
 
 def _runReport(feed,storage):
 	bag = storage.getKeywordWeights()
@@ -21,7 +25,7 @@ def _runReport(feed,storage):
 		storage.putEntry(entry)
 	storage.putFeed(feed)
 	
-def profileObject(text=None,url=None):
+def getObjectKeywords(text=None,url=None):
 	if text:
 		mock = {'url':text[:20],'type':'article','summary':text}
 	elif url:
@@ -31,11 +35,11 @@ def profileObject(text=None,url=None):
 	return generateKeywords(mock)
 	
 def test():
-	logMessage(__name__,'commence testing!')
+	info('commence testing!')
 	from util.storage import Storage
 	with Storage() as content:
 		run(content)
-	logMessage(__name__,'finished testing!')
+	info('finished testing!')
 
 if __name__ == '__main__':
 	test()
