@@ -1,7 +1,7 @@
 from threading import Thread
-from util import *
+import config
 
-def runThreads(function,task_generator,storages):
+def runThreads(function,task_generator,storage):
 	def startThread(function,*args):
 		thread = Thread(target=function,args=args)
 		thread.start()
@@ -9,7 +9,7 @@ def runThreads(function,task_generator,storages):
 	
 	threads = []
 	for task in task_generator():
-		threads.append(startThread(function,task,storages))
+		threads.append(startThread(function,task,storage))
 		if len(threads) > config.THREADLIMIT:
 			break
 	
