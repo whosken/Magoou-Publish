@@ -7,7 +7,7 @@ def run(storage):
 def runEdit(profile,storage):
 	release = selectCandidates(profile['topics'],storage)
 	issue = {
-				'username':profile.['username'],
+				'username':profile['username'],
 				'entries':release,
 			}
 	result = storage.putIssue(issue)
