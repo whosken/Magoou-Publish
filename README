@@ -1,5 +1,7 @@
 Welcome to Magoou Publish -- Magoou.com's web content collection and suggestion engine. This file will be updated soon with more information about the engine and how to interface with it.
 
+services - master interface which can be imported directly
+
 The reporter package is for collecting and profiling web contents.
 feedReader - examines feeds and create entries
 entryScraper - scrapes the entry if feed doesn't provide enough info
@@ -10,12 +12,11 @@ The editor package is for selecting and suggesting contents based on profiles.
 languageModel - score contents based on probability
 cosSim - score contents based on angles in vector space
 ensemble - combine the scores of all other methodologies
-editor - master module that prepares input and calls others
+editor - master module that prepares inputs and calls others
 
 The util package contains low level code for logging and storage, some generic functions for simple linear algebra operations, and other useful functions.
-logger - logs error to console and file
-storage - not included, see below
 tools - set of linear algebra and dictionary operations
+storage - not included, see below
 
 A storage package is used but not included in the repository. This is to keep the implementation flexible for other developers. You can use a database and interface you prefer as long as it can consume and produce dictionaries with the following keys:
 entry - url, data source, language, type, author, datetime, title, summary, media, keywords {word:weight},
