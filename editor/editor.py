@@ -1,8 +1,6 @@
 from publish.util import *
 from copy import deepcopy
 
-configLogging(__name__)
-
 def run(storage):
 	runThreads(runEdit,storage.getUnprocessedProfiles,storage)
 
@@ -80,7 +78,7 @@ def _updateKeywordWeights(candidates,keywords):
 	
 def test():
 	info('commence testing!')
-	from util.storage import Storage
+	from publish.util.storage import Storage
 	with Storage() as storage:
 		run(storage)
 	info('finished testing!')

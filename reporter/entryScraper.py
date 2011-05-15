@@ -6,8 +6,6 @@ from urllib2 import urlopen
 from BeautifulSoup import BeautifulSoup, NavigableString
 from publish.util import *
 
-configLogging(__name__)
-
 def scrapeEntry(entry):
 	info('scraping ' + entry['url'])
 	try:

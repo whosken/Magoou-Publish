@@ -3,46 +3,41 @@ from math import log1p
 from copy import deepcopy
 import re
 
-configLogging(__name__)
-
 def generateKeywords(entry,bag=None,keywords=None):
 	info("selecting keywords from " + entry['url'])
-	try:
-		# TODO: consider better hieuristics for assigning bonuses
-		if not keywords:
-			keywords = {}
-		else:
-			tools.updateDictValues(keywords,config.FEEDDISCOUNT,additive=False) # reduce weighting of keywords from feeds
+	# TODO: consider better hieuristics for assigning bonuses
+	if not keywords:
+		keywords = {}
+	else:
+		tools.updateDictValues(keywords,config.FEEDDISCOUNT,additive=False) # reduce weighting of keywords from feeds
+	
+	naive = entry['language'] in config.NAIVECHUNK
+	
+	if 'title' in entry:
+		_collectKeywords(collectTerms(entry['title'],ngram=False),keywords,config.BONUSES['title'])
 		
-		naive = entry['language'] in config.NAIVECHUNK
+	if 'summary' in entry:
+		_collectKeywords(collectTerms(entry['summary'],ngram=not naive),keywords,config.BONUSES['summary'])
+	if 'highlight' in entry: # if content has been scraped
+		_collectKeywords(collectTerms(entry.pop('highlight'),ngram=not naive),keywords,config.BONUSES['highlight'])
+	
+	infos = []
+	for key in ('author','source','language'):
+		if key in entry:
+			infos.append(entry[key])
+	infos = list(_filteredTerms(infos))
+	_collectKeywords(infos,keywords,config.BONUSES['info'],False)
+	
+	if 'categories' in entry:
+		categories = []
+		for category in entry['categories']:
+			categories += collectTerms(category,ngram=not naive)
+		_collectKeywords(categories,keywords,config.BONUSES['category'])
 		
-		if 'title' in entry:
-			_collectKeywords(collectTerms(entry['title'],ngram=False),keywords,config.BONUSES['title'])
-			
-		if 'summary' in entry:
-			_collectKeywords(collectTerms(entry['summary'],naive=naive),keywords,config.BONUSES['summary'])
-		if 'highlight' in entry: # if content has been scraped
-			_collectKeywords(collectTerms(entry.pop('highlight'),naive=naive),keywords,config.BONUSES['highlight'])
-		
-		infos = []
-		for key in ('author','source','language'):
-			if key in entry:
-				infos.append(entry[key])
-		infos = list(_filteredTerms(infos))
-		_collectKeywords(infos,keywords,config.BONUSES['info'],False)
-		
-		if 'categories' in entry:
-			categories = []
-			for category in entry['categories']:
-				categories += collectTerms(category,naive=naive)
-			_collectKeywords(categories,keywords,config.BONUSES['category'])
-			
-		if bag:
-			_getNearTerms(keywords,bag)
-		
-		return keywords
-	except Exception, e:
-		critical(e)
+	if bag:
+		_getNearTerms(keywords,bag)
+	
+	return keywords
 	
 def _collectKeywords(terms,words,bonus=0,calcWeight=True):
 	for term in terms:
@@ -58,36 +53,34 @@ def _getNearTerms(words,bag):
 	for word in deepcopy(words):
 		if len(word) > config.LENGTH:
 			for term,score in bag.items():
-				key = sorted((word,term))
+				key = repr(sorted((word,term)))
 				if key not in cache:
 					cache[key] = _calcWordDistance(word,term) < config.DISTANCE
 				if cache[key]:
 					tools.updateDictValue(words,term,score * config.NEARDISCOUNT)
 	return words
 	
-def collectTerms(string,ngram=True,naive=False):
+def collectTerms(string,ngram=True):
 	string = re.sub(r'<[^<]*?>|\W',' ', string)
 	tokens = list(_filteredTerms(string.split()))
 	if ngram:
 		count = len(tokens)-1 #dont count the last term
 		for i in range(count):
-			if naive:
-				tokens.append(tokens[i:i+2])
-			else:
-				j = i
-				while tokens[j].istitle():
-					if j < count:
-						j += 1
-					else:
-						break
-				token = tokens[i:j]
-				if len(token) > 1:
-					tokens.append(' '.join(token))
+			j = i
+			while tokens[j].istitle():
+				if j < count:
+					j += 1
+				else:
+					break
+			token = tokens[i:j]
+			if len(token) > 1:
+				tokens.append(' '.join(token))
 	return tokens
 
 def _filteredTerms(tokens): #TODO: use better NLP algorithms
 	for token in tokens:
-		if len(token) > 1:
+		# filter out 1 char terms and numeric terms
+		if len(token) > 1 and re.match(r'^\d+$',token):
 			yield token
 			
 def _weightTerm(term,docLength,bonus): #TODO: use better weightings

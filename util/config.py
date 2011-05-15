@@ -1,5 +1,5 @@
 # editor.py, reporter.py
-THREADLIMIT = 10
+THREADLIMIT = 200
 
 # editor.py
 FEEDBACKSCORES = {

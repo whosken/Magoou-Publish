@@ -3,15 +3,10 @@ from datetime import *
 import feedparser
 from publish.util import *
 
-configLogging(__name__)
-
 def readFeed(feed):
 	info('reading ' + feed['url'])
-	try:
-		xml = feedparser.parse(feed['url'])
-		return _traverseXml(feed,xml)
-	except Exception, e:
-		critical(e)
+	xml = feedparser.parse(feed['url'])
+	return _traverseXml(feed,xml)
 
 def _traverseXml(feed,xml):
 	for entry in xml.entries:

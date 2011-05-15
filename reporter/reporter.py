@@ -1,7 +1,5 @@
 from publish.util import *
 
-configLogging(__name__)
-
 def run(storage):
 	try:
 		runThreads(_runReport,storage.getUnparsedFeeds,storage)
@@ -17,7 +15,7 @@ def _runReport(feed,storage):
 	
 	feed_keywords = feed['keywords'] if 'keywords' in feed else None
 	for entry, need_scrape in readFeed(feed):
-		if storage.checkDocumentExistence(None,key=entry['url']):
+		if storage.checkDocumentExistence(entry['url']):
 			continue
 		if need_scrape:
 			scrapeEntry(entry)
@@ -36,9 +34,9 @@ def getObjectKeywords(text=None,url=None):
 	
 def test():
 	info('commence testing!')
-	from util.storage import Storage
-	with Storage() as content:
-		run(content)
+	from publish.util.storage import Storage
+	with Storage() as storage:
+		run(storage)
 	info('finished testing!')
 
 if __name__ == '__main__':

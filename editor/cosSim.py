@@ -1,12 +1,7 @@
 from publish.util import *
 
-configLogging(__name__)
-
 def scoreEntries(query,matrix):
-	try:
-		return _cosSim(query,matrix)
-	except Exception, e:
-		critical(e)
+	return _cosSim(query,matrix)
 	
 def _cosSim(query,matrix):
 	# cos-sim = A dot B / |A||B|

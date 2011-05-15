@@ -1,23 +1,18 @@
 from publish.util import *
 
-configLogging(__name__)
-
 def scoreEntries(candidates,*args):
-	try:
-		return _ensembleScores(candidates,*args)
-	except Exception, e:
-		critical(e)
+	return _ensembleScores(candidates,*args)
 		
 # TODO: implement collaborative filtering
 # TODO: implement latent dirichlet allocation
 	
-def _ensembleScores(candidates,prefer,preferBag,pool,wordBag):
+def _ensembleScores(candidates,topic,topicBag,pool,wordBag):
 	release = {}
 	for component,entries in candidates.items():
 		alpha = config.ALPHAS[component] if component in config.ALPHAS else 1
 		total = sum(entries.values())
 		for id,score in entries.items():
-			beta = len(pool[id]) / len(wordBag) if component in config.BETAS['item'] else len(prefer) / len(preferBag)
+			beta = len(pool[id]) / len(wordBag) if component in config.BETAS['item'] else len(topic) / len(topicBag)
 			weight = score * alpha * beta / total
 			tools.updateDictValue(release,id,weight)
 	return release

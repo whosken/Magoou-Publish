@@ -2,13 +2,8 @@ from publish.util import *
 from math import exp
 from copy import deepcopy
 
-configLogging(__name__)
-
 def scoreEntries(topics,matrix,wordBag):
-	try:
-		return _languageModel(topics,matrix,wordBag)
-	except Exception, e:
-		critical(e)
+	return _languageModel(topics,matrix,wordBag)
 	
 def _languageModel(topics,matrix,wordWeight):
 	# language model with dirichlet smoothing
@@ -20,7 +15,7 @@ def _languageModel(topics,matrix,wordWeight):
 		docWeight[id] = sum(doc.values())
 		totalWeight += docWeight[id]
 	
-	def yieldScore(id):
+	def yieldScore(id): # TODO: use map?
 		for word in docWordWeight[id]:
 			yield _getScore(docWordWeight[id][word],wordWeight[word],docWeight[id],totalWeight)
 	
