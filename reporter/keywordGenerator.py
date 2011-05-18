@@ -11,15 +11,15 @@ def generateKeywords(entry,bag=None,keywords=None):
 	else:
 		tools.updateDictValues(keywords,config.FEEDDISCOUNT,additive=False) # reduce weighting of keywords from feeds
 	
-	naive = entry['language'] in config.NAIVECHUNK
+	naive = 'language' in entry and entry['language'] in config.NAIVECHUNK
 	
 	if 'title' in entry:
 		_collectKeywords(collectTerms(entry['title'],ngram=False),keywords,config.BONUSES['title'])
 		
 	if 'summary' in entry:
-		_collectKeywords(collectTerms(entry['summary'],ngram=not naive),keywords,config.BONUSES['summary'])
+		_collectKeywords(collectTerms(entry['summary'],naive=naive),keywords,config.BONUSES['summary'])
 	if 'highlight' in entry: # if content has been scraped
-		_collectKeywords(collectTerms(entry.pop('highlight'),ngram=not naive),keywords,config.BONUSES['highlight'])
+		_collectKeywords(collectTerms(entry.pop('highlight'),naive=naive),keywords,config.BONUSES['highlight'])
 	
 	infos = []
 	for key in ('author','source','language'):
@@ -31,7 +31,7 @@ def generateKeywords(entry,bag=None,keywords=None):
 	if 'categories' in entry:
 		categories = []
 		for category in entry['categories']:
-			categories += collectTerms(category,ngram=not naive)
+			categories += collectTerms(category,naive=naive)
 		_collectKeywords(categories,keywords,config.BONUSES['category'])
 		
 	if bag:
@@ -60,10 +60,12 @@ def _getNearTerms(words,bag):
 					tools.updateDictValue(words,term,score * config.NEARDISCOUNT)
 	return words
 	
-def collectTerms(string,ngram=True):
+def collectTerms(string,ngram=True,naive=True):
 	string = re.sub(r'<[^<]*?>|\W',' ', string)
-	tokens = list(_filteredTerms(string.split()))
-	if ngram:
+	if not naive:
+		tokens = list(_filteredTerms(string.split()))
+	else: return [] # TODO: handle naive chunking
+	if ngram and not naive:
 		count = len(tokens)-1 #dont count the last term
 		for i in range(count):
 			j = i
@@ -80,7 +82,7 @@ def collectTerms(string,ngram=True):
 def _filteredTerms(tokens): #TODO: use better NLP algorithms
 	for token in tokens:
 		# filter out 1 char terms and numeric terms
-		if len(token) > 1 and re.match(r'^\d+$',token):
+		if len(token) > 1 and not re.match(r'^\d+$',token):
 			yield token
 			
 def _weightTerm(term,docLength,bonus): #TODO: use better weightings

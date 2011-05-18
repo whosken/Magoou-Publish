@@ -29,7 +29,9 @@ def _traverseHtml(entry,soup):
 	if 'title' not in entry:
 		titles = soup.body.findAll('h1')
 		if len(titles) > 0:
-			entry['title'] = titles[0].string
+			title = titles[0].string
+			if title:
+				entry['title'] = title
 	
 	entry['highlight'], div = _highlightText(soup)
 	

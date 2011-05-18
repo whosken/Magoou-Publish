@@ -78,10 +78,3 @@ def completeDict(dict,keys,default=None):
 	set = {}
 	map(set.__setitem__,keys,list(default for key in keys))
 	return mergeDict(dict,set)
-
-def cleanDict(dict):
-	# remove entries with None or '' values
-	for key,value in dict.items():
-		if value is None or value == '':
-			dict.pop(key)
-	return dict

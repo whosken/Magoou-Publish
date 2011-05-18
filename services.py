@@ -21,11 +21,13 @@ def edit():
 	with Storage() as storage:
 		editor.run(storage)
 
-def clean():
+def clean(object=None):
 	with Storage() as storage:
-		storage.deleteOldIssues()
-		storage.deleteOldEntries()
-		storage.compact()
+		if object != 'issue':
+			storage.deleteOldEntries()
+		if object != 'entry':
+			storage.deleteOldIssues()
+		# storage.compact()
 
 """
 GET functions
@@ -79,8 +81,7 @@ def putFeed(url,type,aboutUrl=None,aboutText=None,icon=None):
 		feed['icon'] = icon
 	print feed
 	with Storage() as storage:
-		storage.putFeed(feed)
-	return feed
+		return storage.putFeed(feed)
 	
 def putProfile(username,topics=None,samples=None,feeds=None,words=None):
 	if not topics:
@@ -101,9 +102,9 @@ def putProfile(username,topics=None,samples=None,feeds=None,words=None):
 			'topics':topics,
 		}
 	with Storage() as storage:
-		storage.putProfile(profile)
+		result = storage.putProfile(profile)
 		editor.runEdit(profile,storage)
-		return storage
+		return result
 	
 def putFeedback(profileId,entryId,action):
 	with Storage() as storage:
@@ -113,5 +114,4 @@ def putFeedback(profileId,entryId,action):
 					'entryid':entryId,
 					'action':action,
 				}
-			storage.putFeedback(feedback);
-			return feedback
+			return storage.putFeedback(feedback);

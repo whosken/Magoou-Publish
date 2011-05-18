@@ -1,3 +1,8 @@
+# storage.py
+FEEDAGE = 24 # hours = 1 days
+ISSUEAGE = 24 # hours = 1 days
+STORED = 30 # save latest issues, ~1 months
+
 # editor.py, reporter.py
 THREADLIMIT = 200
 
