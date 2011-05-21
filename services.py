@@ -35,7 +35,7 @@ GET functions
 def getDocument(id,object=None):
 	with Storage() as storage:
 		doc = storage.getDocument(id)
-		if object and doc['object'] != object:
+		if doc and object and doc['object'] != object:
 			return None
 		return doc
 	
