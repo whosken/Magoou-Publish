@@ -2,31 +2,35 @@ from publish.util import *
 from copy import deepcopy
 
 def run(storage):
-	runThreads(runEdit,storage.getUnprocessedProfiles,storage)
+	runThreads(runEdit,storage.getUnprocessedProfiles,storage,wait=False)
 
 def runEdit(profile,storage):
-	release = selectCandidates(profile['topics'],storage)
+	profile = factorFeedback(profile,storage)
 	issue = {
 				'username':profile['username'],
-				'entries':release,
+				'entries':selectCandidates(profile,storage),
 			}
 	result = storage.putIssue(issue)
-	storage.putUser(user)
+	storage.putProfile(profile)
 	return result
 	
-def selectCandidates(topics,storage):
+def selectCandidates(profile,storage,cf=True):
+	def prepareQueryMatrix(topics,wordBag,pool):
+		# standardization
+		words = topics.viewkeys() | wordBag.viewkeys()
+		query = deepcopy(topics)
+		bag = deepcopy(wordBag)
+		tools.updateDictValues(query,1.0/sum(query.values()),additive=False) # nornmalize query
+		tools.completeDict(query,words,default=0)
+		tools.completeDict(bag,words,default=0)
+		matrix = _getMatrix(pool,words)
+		return query,matrix,bag
+	
+	topics = profile['topics']
 	entries = storage.getLatestEntries()
-	pool = _getPool(entries)
 	wordBag = storage.getKeywordWeights()
 	topicBag = storage.getTopicWeights()
-	
-	# standardization
-	words = set(topics.keys() + wordBag.keys())
-	query = deepcopy(topics)
-	tools.updateDictValues(query,1.0/sum(query.values()),additive=False) # nornmalize query
-	tools.completeDict(query,words,default=0)
-	tools.completeDict(wordBag,words,default=0)
-	matrix = _getMatrix(pool,words)
+	query,matrix,wordWeights = prepareQueryMatrix(topics,wordBag,_getPool(entries))
 	
 	import languageModel as lang
 	import cosSim as cos
@@ -34,47 +38,66 @@ def selectCandidates(topics,storage):
 	
 	candidates = {}
 	candidates['cosSim'] = cos.scoreEntries(query,matrix)
-	candidates['languageModel'] = lang.scoreEntries(query,matrix,wordBag)
+	candidates['languageModel'] = lang.scoreEntries(query,matrix,wordWeights)
+	
+	if 'model' not in profile or not profile['model']: # if profile is not a topic model
+		models = _getPool(storage.getLatestProfiles(),model=True)
+		issues = storage.getLatestIssues()
+		query,models = prepareQueryMatrix(topics,topicBag,models)
+		
+		import collabrativeFiltering as coFilter
+		candidtates['collabrativeFiltering'] = coFilter.scoreEntries(query,models,issues)
 	
 	return ensemble.scoreEntries(candidates,topics,topicBag,pool,wordBag)
 	
-# to do, move out of editor
-def _factorFeedback(profile,storage):
+def factorFeedback(profile,storage):
 	# base on the action, reward each keyword
 	for feedback in storage.getUserFeedbacks(profile['username']):
-		if feedback['datetime'] < profile['datetime']:
-			continue
-		action = feedback['action'] if feedback['action'] in config.FEEDBACKSCORES else None
-		if action:
-			score = config.FEEDBACKSCORES[action]
-			id = feedback['entryid']
-			if contents.checkDocumentExistence(id):
-				entry = contents.getDocument(id)
-				for word in entry['keywords'].keys():
-					tools.updateDictValue(profile['topics'],word,score,additive=False)
+		try:
+			score = config.FEEDBACKSCORES[feedback['action']];
+			entry = contents.getDocument(feedback['entryid'])
+			if entry:
+				tools.completeDict(
+						profile['topics'],
+						entry['keywords'].keys(),
+						default=score,
+						additive=False
+					)
+			# remove processed feedback
+			storage.deleteDocument(feedback['_id'],feedback['_rev'])
+		except KeyError, e:
+			error(e)
 	return profile
 	
-def _getPool(entries):
+def modelTopics(storage):
+	# run topic modelling techniques to create topic profiles
+	import latentDirichletAllocation as lda
+	from hashlib import sha1
+	
+	entries = storage.getLatestEntries()
+	for topics in lda.getTopics(entries):
+		profile = {
+				'username':sha1('$'.join(topics.keys())).hexdigest(),
+				'topics':topics,
+				'model':True
+			}
+		yield storage.putProfile(profile)
+	
+def _getPool(entries,model=False):
 	# return a map from entry id to keywords
+	if not len(entries) > 0:
+		raise Exception ,'No entries found! Try running reporter first'
 	pool = {}
 	for entry in entries:
-		pool[entry['_id']] = entry['keywords']
-	if not len(pool) > 0:
-		raise Exception ,'No entries found! Try run reporter first'
+		pool[entry['_id']] = entry['keywords' if not model else 'topics']
 	return pool
 	
 def _getMatrix(entries,keys):
 	# returns a matrix where each value is a dict with words not in value are 0
 	matrix = {}
-	for id,doc in entries.items():
-		matrix[id] = tools.completeDict(doc,keys,default=0)
+	for id,doc in entries.iteritems():
+		matrix[id] = tools.completeDict(deepcopy(doc),keys,default=0)
 	return matrix
-	
-def _updateKeywordWeights(candidates,keywords):
-	# for adding keywords to queries
-	for row in keywords:
-		row['weight'] *= candidates[row['id']]
-	return keywords
 	
 def test():
 	info('commence testing!')

@@ -42,5 +42,5 @@ ALPHAS = {
 		}
 BETAS = {
 			'item':('languageModel','cosSim'),
-			'user':(),
+			'user':('collabrativeFiltering'),
 		}

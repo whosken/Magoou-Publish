@@ -13,7 +13,7 @@ def _runReport(feed,storage):
 	from keywordGenerator import generateKeywords
 	from entryScraper import scrapeEntry
 	
-	feed_keywords = feed['keywords'] if 'keywords' in feed else None
+	feed_keywords = feed.get('keywords',default=None)
 	for entry, need_scrape in readFeed(feed):
 		if storage.checkDocumentExistence(entry['url']):
 			continue

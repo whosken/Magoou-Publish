@@ -46,35 +46,30 @@ def cleanText(string):
 def updateDictValue(dict,key,value,additive=True):
 	# update value in dict, only for numbers
 	if type(value) not in (float,int):
-		raise Exception('unsupported type: '+str(type(value)))
+		raise NotImplementedError, 'Unsupported type: '+repr(type(value))
 	
-	if key in dict:
-		if additive:
-			dict[key] += value
-		else:
-			dict[key] *= value
-	else:
-		if additive:
-			dict[key] = value
-		else:
-			dict[key] = value / len(dict)
+	try:
+		if additive: dict[key] += value
+		else: dict[key] *= value
+	except KeyError:
+		if additive: dict[key] = value
+		else: dict[key] = value / len(dict)
 	return dict
 	
 def updateDictValues(dict,value,additive=True):
-	for key in dict:
-		updateDictValue(dict,key,value,additive)
-	return dict
+	return completeDict(dict,dict.keys(),default=value,additive=additive)
 	
-def mergeDict(dict,dict2,additive=True):
-	for key,value in dict2.items():
-		updateDictValue(dict,key,value,additive)
+def mergeDictss(dict,dict2,additive=True):
+	for key,value in dict2.iteritems():
+		updateDictValue(dict,key,value,additive=additive)
 	return dict
 	
 def sortDictByValue(dict,revert=False):
 	return sorted(dict.iteritems(),key=itemgetter(1),reverse=revert)
 	
-def completeDict(dict,keys,default=None):
+def completeDict(dict,keys,default=None,additive=True):
 	# for creating dict containing all key in keys
-	set = {}
-	map(set.__setitem__,keys,list(default for key in keys))
-	return mergeDict(dict,set)
+	return mergeDictss(dict,
+			dict.fromkeys(keys,default),
+			additive=additive
+		)

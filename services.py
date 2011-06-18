@@ -7,7 +7,7 @@ from datetime import datetime
 """
 Enums
 """
-feedTypes = ['publication','official','personal','media','hub'] # TODO: move to publish
+feedTypes = ['publication','official','personal','media','hub']
 actions = config.FEEDBACKSCORES.keys()
 
 """
@@ -21,13 +21,23 @@ def edit():
 	with Storage() as storage:
 		editor.run(storage)
 
-def clean(object=None):
+def clean(object='all'):
 	with Storage() as storage:
-		if object != 'issue':
+		if object == 'all':
 			storage.deleteOldEntries()
-		if object != 'entry':
 			storage.deleteOldIssues()
-		# storage.compact()
+			storage.deleteTopicProfiles()
+			storage.compact()
+		elif object == 'entry':
+			storage.deleteOldEntries()
+		elif object == 'issue':
+			storage.deleteOldIssues()
+		elif object == 'model':
+			storage.deleteTopicProfiles()
+		
+def modelTopics():
+	with Storage() as storage:
+		return editor.modelTopics(storage)
 
 """
 GET functions
@@ -41,18 +51,12 @@ def getDocument(id,object=None):
 	
 def getIssues(username):
 	with Storage() as storage:
-		def get_docs(issue):
-			for id,weight in issue['entries']:
-				yield {
-						'weight':weight,
-						'doc':storage.getDocument(id),
-					}
-		
 		for issue in storage.getUserIssues(username):
-			yield {
-					'datetime':issue['datetime'],
-					'docs':list(get_docs(issue)),
-				}
+			yield issue
+			# yield {
+					# 'datetime':issue['datetime'],
+					# 'docs':list({'weight':weight,'doc':storage.getDocument(id)} for id,weight in issue['entries']),
+				# }
 	
 def getKeywords(feeds=None,urls=None,string=None):
 	keywords = {}
@@ -60,12 +64,12 @@ def getKeywords(feeds=None,urls=None,string=None):
 		for feed in feeds:
 			doc = getDocument(feed['url'])
 			doc = doc or putFeed(feed,'article')
-			tools.mergeDict(keywords,doc['keywords'])
+			tools.mergeDicts(keywords,doc['keywords'])
 	if urls:
 		for url in urls:
-			tools.mergeDict(keywords,reporter.getObjectKeywords(url=url))
+			tools.mergeDicts(keywords,reporter.getObjectKeywords(url=url))
 	if string:
-		tools.mergeDict(keywords,reporter.getObjectKeywords(text=string))
+		tools.mergeDicts(keywords,reporter.getObjectKeywords(text=string))
 	return keywords
 
 """
@@ -79,7 +83,6 @@ def putFeed(url,type,aboutUrl=None,aboutText=None,icon=None):
 	feed['keywords'] = getKeywords(urls=[aboutUrl] if aboutUrl else [],string=aboutText)
 	if icon:
 		feed['icon'] = icon
-	print feed
 	with Storage() as storage:
 		return storage.putFeed(feed)
 	
@@ -89,11 +92,11 @@ def putProfile(username,topics=None,samples=None,feeds=None,words=None):
 	if samples:
 		for sample in samples:
 			keywords = getKeywords(urls=sample)
-			tools.mergeDict(topics,keywords)
+			tools.mergeDicts(topics,keywords)
 	if feeds:
 		for feed in feeds:
 			keywords = getKeywords(feed=feed)
-			tools.mergeDict(topics,keywords)
+			tools.mergeDicts(topics,keywords)
 	if words:
 		word_dict = tools.completeDict(topics,words,1.0/float(len(words)))
 		

@@ -1,7 +1,11 @@
 from publish.util import *
 
 def scoreEntries(query,matrix):
-	return _cosSim(query,matrix)
+	try:
+		return _cosSim(query,matrix)
+	except Exception, e:
+		error(e)
+		return {}
 	
 def _cosSim(query,matrix):
 	# cos-sim = A dot B / |A||B|

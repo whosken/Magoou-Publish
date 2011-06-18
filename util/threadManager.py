@@ -1,7 +1,7 @@
 from threading import Thread
 import config
 
-def runThreads(function,task_generator,storage):
+def runThreads(function,task_generator,storage,wait=True):
 	def startThread(function,args):
 		thread = Thread(target=function,args=args)
 		thread.daemon = True
@@ -14,5 +14,6 @@ def runThreads(function,task_generator,storage):
 		if len(threads) > config.THREADLIMIT:
 			break
 	
-	for thread in threads:
-		thread.join()
+	if wait:
+		for thread in threads:
+			thread.join()

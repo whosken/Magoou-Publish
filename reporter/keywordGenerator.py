@@ -52,7 +52,7 @@ cache = {} # cache for word distances
 def _getNearTerms(words,bag):
 	for word in deepcopy(words):
 		if len(word) > config.LENGTH:
-			for term,score in bag.items():
+			for term,score in bag.iteritems():
 				key = repr(sorted((word,term)))
 				if key not in cache:
 					cache[key] = _calcWordDistance(word,term) < config.DISTANCE
