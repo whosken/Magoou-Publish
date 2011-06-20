@@ -114,10 +114,10 @@ class Storage(CouchManager):
 	
 	def deleteOldEntries(self,age=config.ISSUEAGE*config.STORED):
 		return self.deleteOldObjects('entry',age=age)
-		
+	
 	def deleteOldIssues(self,age=config.ISSUEAGE*config.STORED):
 		return self.deleteOldObjects('issue',age=age)
-		
+	
 	def deleteTopicProfiles(self):
 		view = 'by_object?key={0}'.format('profile')
 		response = self.getOrPostObject(view=('document',view))

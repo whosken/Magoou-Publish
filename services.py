@@ -53,10 +53,6 @@ def getIssues(username):
 	with Storage() as storage:
 		for issue in storage.getUserIssues(username):
 			yield issue
-			# yield {
-					# 'datetime':issue['datetime'],
-					# 'docs':list({'weight':weight,'doc':storage.getDocument(id)} for id,weight in issue['entries']),
-				# }
 	
 def getKeywords(feeds=None,urls=None,string=None):
 	keywords = {}
