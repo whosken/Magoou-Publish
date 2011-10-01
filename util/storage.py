@@ -37,13 +37,6 @@ class Storage(CouchManager):
 		id = feedback['profileid']+feedback['entryid']+jsonify(feedback['datetime'])
 		return self.putObject('feedback',feedback,id=id,overwrite=False)
 		
-	def getOutOfDateObjects(self,object,age):
-		timespan = timedelta(hours=age)
-		end,_ = getTimeframe(span=timespan)
-		view = '{0}?endkey={1}'.format(object,end)
-		response = self.getOrPostObject(view=('datetime',view))
-		return extractValues(response)
-		
 	def getUnparsedFeeds(self,age=config.FEEDAGE):
 		return self.getOutOfDateObjects('feed',age)
 		
@@ -63,16 +56,6 @@ class Storage(CouchManager):
 		
 	def getUserFeedbacks(self,username):
 		return self.getUserObject(username,'feedback')
-		
-	def getLatestObject(self,object,start,age):
-		if start:
-			start,end = _getTimeframe(start=start)
-		else:
-			timespan = timedelta(hours=age)
-			start,end = getTimeframe(span=timespan)
-		view = '{0}?startkey={1}&endkey={2}'.format(object,start,end)
-		response = self.getOrPostObject(view=('datetime',view))
-		return extractValues(response)
 		
 	def getLatestEntries(self,start=None,age=config.ISSUEAGE+config.FEEDAGE):
 		return getLatestObject(self,'entry',start,age)
@@ -101,16 +84,6 @@ class Storage(CouchManager):
 		
 	def getTopicWeights(self,topic=None):
 		return self.getTermWeights('profile',term=topic)
-	
-	def deleteOldObjects(self,type,age):
-		timespan = timedelta(hours=age)
-		end,_ = getTimeframe(span=timespan)
-		view = '{0}?endkey={1}'.format(type,end)
-		response = self.getOrPostObject(view=('datetime',view))
-		for row in response:
-			result = row['value']
-			self.deleteDocument(result['_id'],result['_rev'])
-		return response
 	
 	def deleteOldEntries(self,age=config.ISSUEAGE*config.STORED):
 		return self.deleteOldObjects('entry',age=age)
